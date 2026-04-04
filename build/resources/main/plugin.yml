@@ -1,0 +1,21 @@
+name: BitGrid
+version: '0.1-ALPHA'
+main: net.bitgrid.Bitgrid
+api-version: '1.20'
+authors: [ Dev-Wonjoon ]
+
+commands:
+  bitgrid:
+    description: BitGrid Storage Management
+    usage: /bitgrid <give|invite|kick|members|leave>
+
+permissions:
+  bitgrid.use:
+    description: Storage Core use
+    default: true
+  bitgrid.craft:
+    description: Storage Core crafting
+    default: true
+  bitgrid.admin:
+    description: Storage Core admin
+    default: op

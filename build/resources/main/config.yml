@@ -1,0 +1,15 @@
+database:
+  type: sqlite # sqlite | mysql | postgresql
+  host: localhost
+  port: 3306
+  name: net.bitgrid
+  username: root
+  password: ""
+
+storage-core:
+    crafting:
+      enabled: true
+      recipe:
+        row1: ["DIAMOND", "ENDER_PEARL", "DIAMOND"]
+        row2: ["ENDER_PEARL", "BARREL", "ENDER_PEARL"]
+        row3: ["DIAMOND", "ENDER_PEARL", "DIAMOND"]
