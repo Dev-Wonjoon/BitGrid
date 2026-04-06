@@ -42,7 +42,7 @@ class DatabaseManager(private val config: DatabaseConfig, private val dataFolder
         Database.connect(dataSource)
 
         transaction {
-            SchemaUtils.create(StorageItems, GridMembers, PlayerSettings)
+            SchemaUtils.create(StorageItems, GridMembers, PlayerSettings, GridUpgrade)
         }
     }
     fun disconnect() {

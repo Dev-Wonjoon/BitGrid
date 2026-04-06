@@ -127,10 +127,16 @@ class StorageService {
     // 검색 (아이템 이름 기준)
     fun searchItems(gridId: String, query: String, sort: SortType = SortType.TIME): List<StoredItem> {
         return getItems(gridId, sort).filter { stored ->
-            val name = stored.item.itemMeta?.displayName
-                ?: stored.item.type.name.replace("_", " ")
-            name.contains(query, ignoreCase = true)
+            val displayName = stored.item.itemMeta?.displayName
+            val materialName = stored.item.type.name.replace("_", " ")
+            val matchTarget = if (!displayName.isNullOrEmpty()) {
+                "$displayName $materialName"
+            } else {
+                materialName
+            }
+            matchTarget.contains(query, ignoreCase = true)
         }
+
     }
 }
 

@@ -12,6 +12,7 @@ object GuiItemFactory {
         val lore = meta.lore?.toMutableList() ?: mutableListOf()
         lore.add("")
         lore.add("§7수량: §f${String.format("%,d", storedItem.amount)}")
+        meta.lore = lore
         display.itemMeta = meta
         display.amount = 1
         return display
@@ -39,6 +40,15 @@ object GuiItemFactory {
         val meta = item.itemMeta!!
         meta.setDisplayName("§7검색")
         meta.lore = listOf("§7클릭하여 아이템을 검색합니다.")
+        item.itemMeta = meta
+        return item
+    }
+
+    fun createUpgradeItem(): ItemStack {
+        val item = ItemStack(Material.ANVIL)
+        val meta = item.itemMeta!!
+        meta.setDisplayName("§b업그레이드")
+        meta.lore = listOf("§7클릭하여 업그레이드 메뉴를 엽니다.")
         item.itemMeta = meta
         return item
     }

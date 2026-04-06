@@ -8,7 +8,7 @@ import net.bitgrid.command.BitgridCommand
 import net.bitgrid.config.DatabaseConfig
 import net.bitgrid.database.DatabaseManager
 import net.bitgrid.storage.StorageService
-import net.bitgrid.util.SignInputUtil
+import net.bitgrid.util.ChatInputUtil
 import org.bukkit.plugin.java.JavaPlugin
 
 class Bitgrid : JavaPlugin() {
@@ -28,10 +28,10 @@ class Bitgrid : JavaPlugin() {
         val storageService = StorageService()
         val storageCoreBlock = StorageCoreBlock(this)
         val storageGui = StorageGui(storageService)
-        val signInputUtil = SignInputUtil(this)
-        signInputUtil.init()
+        val chatInputUtil = ChatInputUtil(this)
+        chatInputUtil.init()
 
-        server.pluginManager.registerEvents(StorageCoreListener(this, storageCoreBlock, storageGui, storageService, signInputUtil), this)
+        server.pluginManager.registerEvents(StorageCoreListener(this, storageCoreBlock, storageGui, storageService, chatInputUtil), this)
 
         //커맨드 등록
         val bitgridCommand = BitgridCommand(storageCoreBlock)

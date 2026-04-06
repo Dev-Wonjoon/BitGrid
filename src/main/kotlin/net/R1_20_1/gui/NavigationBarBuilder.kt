@@ -8,7 +8,7 @@ class NavigationBarBuilder(private val  sortManager: SortManager) {
     fun fill(inventory: Inventory, currentPage: Int, maxPage: Int, player: Player) {
         val filler = GuiItemFactory.createFillerItem()
 
-        inventory.setItem(45, filler)
+        inventory.setItem(45, GuiItemFactory.createUpgradeItem())
         inventory.setItem(46, filler)
         inventory.setItem(47, filler)
 

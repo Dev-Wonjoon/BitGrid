@@ -11,7 +11,7 @@ class StorageGui(
         const val ROWS = 6
         const val SIZE = ROWS * 9
         const val ITEMS_PER_PAGE = 45
-        const val TITLE_PREFIX = "8Bit Grid"
+        const val TITLE_PREFIX = "Bit Grid"
     }
 
     val sortManager = SortManager()

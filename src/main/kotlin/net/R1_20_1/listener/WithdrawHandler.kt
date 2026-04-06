@@ -13,7 +13,7 @@ class WithdrawHandler(
     fun handle(event: InventoryClickEvent, player: Player, gridId: String) {
         val sort = storageGui.sortManager.getSort(player)
         val items = if(storageGui.getSearch(player) != null) {
-            storageService.searchItems(gridId, storageGui.getSearch(player)!!)
+            storageService.searchItems(gridId, storageGui.getSearch(player)!!, sort)
         } else {
             storageService.getItems(gridId, sort)
         }
@@ -34,9 +34,7 @@ class WithdrawHandler(
 
     // 좌클릭
     private fun leftClick(event: InventoryClickEvent, player: Player, gridId: String, storedItem: StoredItem) {
-        val stackSize =
-                storedItem.item.maxStackSize.coerceAtMost(storedItem.amount)
-        val withdrawn = storageService.withdraw(gridId, storedItem.itemHash, stackSize) ?: return
+        val withdrawn = storageService.withdraw(gridId, storedItem.itemHash, 1) ?: return
         event.view.cursor = withdrawn
         storageGui.open(player, gridId, storageGui.getPage(player))
     }

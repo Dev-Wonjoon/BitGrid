@@ -4,7 +4,8 @@ import net.R1_20_1.block.StorageCoreBlock
 import net.R1_20_1.gui.StorageGui
 import net.bitgrid.database.GridMembers
 import net.bitgrid.storage.StorageService
-import net.bitgrid.util.SignInputUtil
+import net.bitgrid.util.ChatInputUtil
+import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Barrel
@@ -28,13 +29,13 @@ class StorageCoreListener(
     private val storageCoreBlock: StorageCoreBlock,
     private val storageGui: StorageGui,
     private val storageService: StorageService,
-    private val signInputUtil: SignInputUtil
+    private val chatInputUtil: ChatInputUtil
 ): Listener {
 
     private val ownerKey = NamespacedKey(plugin, "storage_core_owner")
     private val depositHandler = DepositHandler(storageGui, storageService)
     private val withdrawHandler = WithdrawHandler(storageGui, storageService)
-    private val navigationHandler = NavigationHandler(storageGui, storageService, signInputUtil)
+    private val navigationHandler = NavigationHandler(storageGui, storageService, chatInputUtil)
 
     private fun getGridId(playerUuid: String): String {
         return transaction {
@@ -51,7 +52,7 @@ class StorageCoreListener(
         if(!storageCoreBlock.isStorageCore(item)) return
 
         if(!event.player.hasPermission("bitgrid.use")) {
-            event.player.sendMessage("&c권한이 없습니다.")
+            event.player.sendMessage("§c권한이 없습니다.")
             event.isCancelled = true
             return
         }
@@ -62,7 +63,7 @@ class StorageCoreListener(
         container.set(ownerKey, PersistentDataType.STRING, event.player.uniqueId.toString())
         barrel.update()
 
-        event.player.sendMessage("&aStorage Core를 설치했습니다.")
+        event.player.sendMessage("§aStorage Core를 설치했습니다.")
     }
 
     @EventHandler
@@ -79,7 +80,7 @@ class StorageCoreListener(
         event.isCancelled = true
 
         if(!event.player.hasPermission("bitgrid.use")) {
-            event.player.sendMessage("&c권한이 없습니다.")
+            event.player.sendMessage("§c권한이 없습니다.")
             return
         }
 
@@ -97,14 +98,16 @@ class StorageCoreListener(
         if(!container.has(storageCoreBlock.coreKey, PersistentDataType.BYTE)) return
 
         if(!event.player.hasPermission("bitgrid.use")) {
-            event.player.sendMessage("&c권한이 없습니다.")
+            event.player.sendMessage("§c권한이 없습니다.")
             event.isCancelled = true
             return
         }
 
         event.isDropItems = false
-        block.world.dropItemNaturally(block.location, storageCoreBlock.createCoreItem())
-        event.player.sendMessage("&eStorage Core를 회수 했습니다.")
+        if(event.player.gameMode != GameMode.CREATIVE) {
+            block.world.dropItemNaturally(block.location, storageCoreBlock.createCoreItem())
+        }
+        event.player.sendMessage("§eStorage Core를 회수 했습니다.")
     }
 
     @EventHandler
@@ -140,7 +143,7 @@ class StorageCoreListener(
         val player = event.player as? Player ?: return
         if(!event.view.title.startsWith(StorageGui.TITLE_PREFIX)) return;
 
-        if(signInputUtil.isOpen((player))) return
+        if(chatInputUtil.isOpen((player))) return
 
         val cursor = event.view.cursor
         if(cursor != null && !cursor.type.isAir) {
