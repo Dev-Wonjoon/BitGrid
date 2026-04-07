@@ -1,0 +1,52 @@
+message:
+  no_permission: "&c권한이 없습니다."
+  not_ready: "&e준비 중입니다."
+
+  upgrade:
+    already_max: "&c이미 최대 레벨입니다."
+    success: "&a{type} 레벨이 {level}로 업그레이드되었습니다!"
+    not_enough_exp: "&c경험치 레벨이 부족합니다. (필요: {amount})"
+    not_enough_money: "&c돈이 부족합니다. (필요: {amount})"
+    no_vault: "&c경제 플러그인을 찾을 수 없습니다."
+
+command:
+  help_give: "&e/bitgrid give <플레이어> &7- Storage Core 지급"
+  help_invite: "&e/bitgrid invite <플레이어> &7- 그리드에 멤버 초대"
+  help_kick: "&e/bitgrid kick <플레이어> &7- 그리드에서 멤버 제거"
+  help_members: "&e/bitgrid members &7- 그리드 멤버 목록"
+  help_leave: "&e/bitgrid leave &7- 그리드 탈퇴"
+  usage_give: "&c사용법: /bitgrid give <player>"
+  player_not_found: "&c플레이어를 찾을 수 없습니다."
+  give_sender: "&a{player}에게 Storage Core를 지급했습니다."
+  give_receiver: "&aStorage Core를 지급받았습니다."
+  unknown: "&c알 수 없는 명령어입니다."
+
+block:
+  core_name: "&bStorage Core"
+  core_lore: "&7아이템을 무제한으로 저장합니다."
+  placed: "&aStorage Core를 설치했습니다."
+  recovered: "&eStorage Core를 회수 했습니다."
+
+gui:
+  quantity: "&7수량: &f{amount}"
+  page: "&7페이지 {page}"
+  search_name: "&7검색"
+  search_lore: "&7클릭하여 아이템을 검색합니다."
+  search_prompt: "&e&l[BitGrid] &f검색어를 채팅에 입력하세요. &7(취소: \"cancel\")"
+  upgrade_name: "&b업그레이드"
+  upgrade_lore: "&7클릭하여 업그레이드 메뉴를 엽니다."
+  sort_name: "&e정렬"
+  sort_time: "시간순"
+  sort_amount: "개수순"
+  sort_id: "ID순"
+
+  upgrade:
+    title: "Bit Grid &7- &b업그레이드"
+    stack_name: "스택 업그레이드"
+    page_name: "페이지 업그레이드"
+    current_level: "&7현재 레벨: &f{current} / {max}"
+    next_cost: "&a다음 업그레이드 비용: &e{cost} {type}"
+    click_to_upgrade: "&e클릭하여 업그레이드 하세요!"
+    max_level_reached: "&c최대 레벨에 도달했습니다."
+    price_type_exp: "경험치 레벨"
+    price_type_vault: "원"
