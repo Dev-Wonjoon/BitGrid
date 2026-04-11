@@ -1,6 +1,6 @@
 package net.R1_20_1.gui
 
-import net.bitgrid.storage.StorageService
+import net.bitgrid.service.StorageService
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 

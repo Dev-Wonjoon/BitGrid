@@ -8,7 +8,8 @@ import net.bitgrid.command.BitgridCommand
 import net.bitgrid.config.DatabaseConfig
 import net.bitgrid.config.LanguageManager
 import net.bitgrid.database.DatabaseManager
-import net.bitgrid.storage.StorageService
+import net.bitgrid.service.GridMemberService
+import net.bitgrid.service.StorageService
 import net.bitgrid.util.ChatInputUtil
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.plugin.java.JavaPlugin
@@ -40,14 +41,16 @@ class Bitgrid : JavaPlugin() {
         val storageCoreBlock = StorageCoreBlock(this)
         val storageGui = StorageGui(storageService)
         val chatInputUtil = ChatInputUtil(this)
+        val gridMemberService = GridMemberService()
         chatInputUtil.init()
 
-        server.pluginManager.registerEvents(StorageCoreListener(this, storageCoreBlock, storageGui, storageService, chatInputUtil), this)
+        server.pluginManager.registerEvents(StorageCoreListener(this, storageCoreBlock, storageGui, storageService, chatInputUtil, gridMemberService), this)
 
         //커맨드 등록
-        val bitgridCommand = BitgridCommand(storageCoreBlock)
+        val bitgridCommand = BitgridCommand(storageCoreBlock, gridMemberService)
         getCommand("bitgrid")?.setExecutor(bitgridCommand)
         getCommand("bitgrid")?.tabCompleter = bitgridCommand
+
 
         StorageCoreRecipe(this, storageCoreBlock).register(config)
 

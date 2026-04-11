@@ -1,4 +1,4 @@
-package net.bitgrid.storage
+package net.bitgrid.service
 
 import net.bitgrid.database.StorageItems
 import org.bukkit.configuration.file.YamlConfiguration

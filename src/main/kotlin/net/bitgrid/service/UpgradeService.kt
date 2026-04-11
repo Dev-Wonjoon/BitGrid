@@ -1,4 +1,4 @@
-package net.bitgrid.storage
+package net.bitgrid.service
 
 import net.bitgrid.Bitgrid
 import net.bitgrid.config.lang

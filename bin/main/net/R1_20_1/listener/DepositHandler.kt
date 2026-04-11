@@ -1,7 +1,7 @@
 package net.R1_20_1.listener
 
 import net.R1_20_1.gui.StorageGui
-import net.bitgrid.storage.StorageService
+import net.bitgrid.service.StorageService
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 

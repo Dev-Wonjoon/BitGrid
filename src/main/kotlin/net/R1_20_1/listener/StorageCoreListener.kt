@@ -6,7 +6,7 @@ import net.R1_20_1.gui.UpgradeGui
 import net.bitgrid.Bitgrid
 import net.bitgrid.config.lang
 import net.bitgrid.database.GridMembers
-import net.bitgrid.storage.StorageService
+import net.bitgrid.service.StorageService
 import net.bitgrid.util.ChatInputUtil
 import org.bukkit.GameMode
 import org.bukkit.Material
