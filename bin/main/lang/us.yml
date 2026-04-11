@@ -16,10 +16,20 @@ command:
   help_members: "&e/bitgrid members &7- Grid member list"
   help_leave: "&e/bitgrid leave &7- Leave grid"
   usage_give: "&cUsage: /bitgrid give <player>"
+  usage_invite: "&cUsage: /bitgrid invite <player>"
+  usage_kick: "&cUsage: /bitgrid kick <player>"
   player_not_found: "&cPlayer not found."
   give_sender: "&aGave Storage Core to {player}."
   give_receiver: "&aYou received a Storage Core."
   unknown: "&cUnknown command."
+  not_owner: "&cOnly the grid owner can use this command."
+  invite_already: "&cPlayer is already a member or is yourself."
+  invite_success: "&aSuccessfully invited {player} to the grid."
+  invite_received: "&aYou have been invited to {player}'s grid!"
+  kick_not_found: "&c{player} is not a member of this grid."
+  kick_success: "&e{player} has been removed from the grid."
+  member_title: "&fCurrent Members: &7{members}"
+  leave_success: "&eYou have left the grid."
 
 block:
   core_name: "&bStorage Core"
@@ -39,6 +49,8 @@ gui:
   sort_time: "Time"
   sort_amount: "Amount"
   sort_id: "ID"
+  prev_page: "&a◀ Prev"
+  next_page: "&aNext ▶"
 
   upgrade:
     title: "Bit Grid &7- &bUpgrade"

@@ -1,5 +1,6 @@
 package net.R1_20_1.gui
 
+import net.bitgrid.config.lang
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 
@@ -13,7 +14,7 @@ class NavigationBarBuilder(private val  sortManager: SortManager) {
         inventory.setItem(47, filler)
 
         if(currentPage > 0) {
-            inventory.setItem(48, GuiItemFactory.createNavItem("§a◀ 이전", currentPage))
+            inventory.setItem(48, GuiItemFactory.createNavItem(lang("gui.prev_page"), currentPage))
         } else {
             inventory.setItem(48, filler)
         }
@@ -21,7 +22,7 @@ class NavigationBarBuilder(private val  sortManager: SortManager) {
         inventory.setItem(49, GuiItemFactory.createSearchItem())
 
         if(currentPage < maxPage) {
-            inventory.setItem(50, GuiItemFactory.createNavItem("§a다음 ▶", currentPage + 2))
+            inventory.setItem(50, GuiItemFactory.createNavItem(lang("gui.next_page"), currentPage + 2))
         } else {
             inventory.setItem(50, filler)
         }

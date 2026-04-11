@@ -2,7 +2,7 @@ package net.R1_20_1.gui
 
 import net.bitgrid.config.lang
 import net.bitgrid.database.PlayerSettings
-import net.bitgrid.storage.SortType
+import net.bitgrid.service.SortType
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack

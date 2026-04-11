@@ -1,7 +1,7 @@
 package net.R1_20_1.gui
 
 import net.bitgrid.config.lang
-import net.bitgrid.storage.StoredItem
+import net.bitgrid.service.StoredItem
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 

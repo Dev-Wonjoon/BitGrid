@@ -2,7 +2,7 @@ package net.R1_20_1.gui
 
 import net.bitgrid.Bitgrid
 import net.bitgrid.config.lang
-import net.bitgrid.storage.UpgradeService
+import net.bitgrid.service.UpgradeService
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent

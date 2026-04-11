@@ -1,11 +1,10 @@
 package net.R1_20_1.listener
 
 import net.R1_20_1.gui.StorageGui
-import net.bitgrid.storage.StorageService
+import net.bitgrid.service.StorageService
 import net.bitgrid.util.ChatInputUtil
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
-import java.security.Principal
 
 class NavigationHandler(
     private val storageGui: StorageGui,
