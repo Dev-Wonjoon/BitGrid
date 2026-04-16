@@ -5,7 +5,7 @@ import net.R1_20_1.gui.StorageGui
 import net.R1_20_1.gui.UpgradeGui
 import net.bitgrid.Bitgrid
 import net.bitgrid.config.lang
-import net.bitgrid.database.GridMembers
+import net.bitgrid.service.GridMemberService
 import net.bitgrid.service.StorageService
 import net.bitgrid.util.ChatInputUtil
 import org.bukkit.GameMode
@@ -24,15 +24,14 @@ import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
 
-class StorageCoreListener(
+class StorageCoreListenerV2(
     private val plugin: JavaPlugin,
     private val storageCoreBlock: StorageCoreBlock,
     private val storageGui: StorageGui,
     private val storageService: StorageService,
-    private val chatInputUtil: ChatInputUtil
+    private val chatInputUtil: ChatInputUtil,
+    private val gridMemberService: GridMemberService
 ): Listener {
 
     private val ownerKey = NamespacedKey(plugin, "storage_core_owner")
@@ -46,13 +45,8 @@ class StorageCoreListener(
     }
 
 
-    private fun getGridId(playerUuid: String): String {
-        return transaction {
-            GridMembers.selectAll()
-                .where { GridMembers.playerUuid eq playerUuid }
-                .singleOrNull()
-                ?.get(GridMembers.gridId)
-        } ?: playerUuid
+    private fun getGridId(player: Player): String {
+        return gridMemberService.getGridId(player.uniqueId)
     }
 
     @EventHandler
@@ -93,7 +87,7 @@ class StorageCoreListener(
             return
         }
 
-        val gridId = getGridId(event.player.uniqueId.toString())
+        val gridId = getGridId(event.player)
         storageGui.open(event.player, gridId)
     }
 
@@ -130,24 +124,17 @@ class StorageCoreListener(
                 event.isCancelled = true
                 playerUpgradeGuis[player]?.handleClick(event)
             }
-        }
-        when {
             title.startsWith(StorageGui.TITLE_PREFIX) -> {
                 event.isCancelled = true
                 val slot = event.rawSlot
                 if (slot < 0) return
-                val gridId = getGridId(player.uniqueId.toString())
+                val gridId = getGridId(player)
                 when {
                     slot >= StorageGui.SIZE -> depositHandler.handle(event, player, gridId)
                     slot < StorageGui.ITEMS_PER_PAGE -> withdrawHandler.handle(event, player, gridId)
                     slot in 45..53 -> navigationHandler.handle(event, player, gridId)
                 }
             }
-            title == UpgradeGui.getTitle() -> {
-                event.isCancelled = true
-                playerUpgradeGuis[player]?.handleClick(event)
-            }
-
         }
     }
 
@@ -155,7 +142,7 @@ class StorageCoreListener(
     fun onDrag(event: InventoryDragEvent) {
         val player = event.whoClicked as? Player ?: return
         val title = event.view.title
-        if(!title.startsWith(StorageGui.TITLE_PREFIX)) {
+        if(title.startsWith(StorageGui.TITLE_PREFIX)) {
             if(event.rawSlots.any { it < StorageGui.SIZE })
                 event.isCancelled = true
         } else if(title == UpgradeGui.getTitle()) {
@@ -174,7 +161,7 @@ class StorageCoreListener(
             return
         }
 
-        if(!title.startsWith(StorageGui.TITLE_PREFIX))
+        if(!title.startsWith(StorageGui.TITLE_PREFIX)) return
 
         if(chatInputUtil.isOpen((player))) return
         val cursor = event.view.cursor

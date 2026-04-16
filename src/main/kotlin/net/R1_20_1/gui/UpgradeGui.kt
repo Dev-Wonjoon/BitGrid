@@ -17,7 +17,6 @@ class UpgradeGui(private val plugin: Bitgrid, private val gridId: String) {
 
     private val upgradeService = UpgradeService(plugin)
     private lateinit var inventory: Inventory
-    private val playerUpgradeGuis = mutableMapOf<Player, UpgradeGui>()
 
     // 인자에서 gridId 제거 (이미 클래스 생성자에서 받고 있기 때문)
     fun open(player: Player) {

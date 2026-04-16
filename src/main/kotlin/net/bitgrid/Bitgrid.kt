@@ -2,7 +2,7 @@ package net.bitgrid
 
 import net.R1_20_1.block.StorageCoreBlock
 import net.R1_20_1.gui.StorageGui
-import net.R1_20_1.listener.StorageCoreListener
+import net.R1_20_1.listener.StorageCoreListenerV2
 import net.R1_20_1.recipe.StorageCoreRecipe
 import net.bitgrid.command.BitgridCommand
 import net.bitgrid.config.DatabaseConfig
@@ -44,7 +44,16 @@ class Bitgrid : JavaPlugin() {
         val gridMemberService = GridMemberService()
         chatInputUtil.init()
 
-        server.pluginManager.registerEvents(StorageCoreListener(this, storageCoreBlock, storageGui, storageService, chatInputUtil, gridMemberService), this)
+        server.pluginManager.registerEvents(
+            net.R1_20_1.listener.StorageCoreListenerV2(
+                this,
+                storageCoreBlock,
+                storageGui,
+                storageService,
+                chatInputUtil,
+                gridMemberService
+            ), this
+        )
 
         //커맨드 등록
         val bitgridCommand = BitgridCommand(storageCoreBlock, gridMemberService)
@@ -71,9 +80,7 @@ class Bitgrid : JavaPlugin() {
         }
 
         val rsp = server.servicesManager.getRegistration(net.milkbowl.vault.economy.Economy::class.java) ?: return false
-        if(rsp == null) {
-            logger.severe("No Economy plugin registered!")
-        }
+
         economy = rsp.provider
         logger.info("Vault economy successfully hooked: ${economy?.name}")
         return true

@@ -8,13 +8,13 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.sql.upsert
 
 class UpgradeService(private val plugin: Bitgrid) {
 
-    fun getPriceType(path: String) = plugin.config.getString("storage-core.upgrades.$path.price-type") ?: "EXP"
-    fun getCosts(path: String) = plugin.config.getDoubleList("storage-core.upgrades.$path.costs")
-    fun getMaxLevel(path: String) = plugin.config.getInt("storage-core.upgrades.$path.max-level")
-
+    private fun getPriceType(path: String) = plugin.config.getString("storage-core.upgrades.$path.price-type") ?: "EXP"
+    private fun getCosts(path: String) = plugin.config.getDoubleList("storage-core.upgrades.$path.costs")
+    private fun getMaxLevel(path: String) = plugin.config.getInt("storage-core.upgrades.$path.max-level")
     private fun getLimits(path: String) = plugin.config.getIntegerList("storage-core.upgrades.$path.limits")
 
 
@@ -121,10 +121,15 @@ class UpgradeService(private val plugin: Bitgrid) {
     }
 
     private fun upgradeStack(gridId: String) = transaction {
-        ensureRow(gridId)
-        val current = getStackLevel(gridId)
-        GridUpgrades.update({ GridUpgrades.gridId eq gridId }) {
-            it[stackLevel] = current + 1
+        GridUpgrades.upsert(
+            keys = arrayOf(GridUpgrades.gridId),
+            onUpdate = {
+                it[GridUpgrades.stackLevel] = GridUpgrades.stackLevel + 1
+            }
+        ) {
+            it[GridUpgrades.gridId] = gridId
+            it[stackLevel] = 1
+            it[pageLevel] = 0
         }
     }
 
@@ -137,14 +142,15 @@ class UpgradeService(private val plugin: Bitgrid) {
     }
 
     fun ensureRow(gridId: String) = transaction {
-        val exists = GridUpgrades.selectAll()
-            .where { GridUpgrades.gridId eq gridId }.count() > 0
-        if(!exists) {
-            GridUpgrades.insert {
-                it[GridUpgrades.gridId] = gridId
-                it[stackLevel] = 0
-                it[pageLevel] = 0
+        GridUpgrades.upsert(
+            keys = arrayOf(GridUpgrades.gridId),
+            onUpdate = {
+                it[GridUpgrades.pageLevel] = GridUpgrades.pageLevel + 1
             }
+        ) {
+            it[GridUpgrades.gridId] = gridId
+            it[stackLevel] = 0
+            it[pageLevel] = 1
         }
     }
 
