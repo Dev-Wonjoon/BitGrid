@@ -1,42 +1,62 @@
 package net.bitgrid.service
 
 import net.bitgrid.database.StorageItems
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.io.BukkitObjectInputStream
+import org.bukkit.util.io.BukkitObjectOutputStream
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
+import java.util.Base64
 import java.util.UUID
+
+sealed class DepositResult {
+    object Success : DepositResult()
+    object Overflow : DepositResult()
+}
+
+sealed class WithdrawResult {
+    data class Success(val item: ItemStack, val actualAmount: Int) : WithdrawResult()
+    object NotFound : WithdrawResult()
+    object InsufficientStock : WithdrawResult()
+}
 
 enum class SortType {
     TIME, AMOUNT, ID
 }
 
-class StorageService {
+open class StorageService {
 
-    // ItemStack -> JSON
-    private fun serialize(item: ItemStack): String {
-        val yaml = YamlConfiguration();
-        yaml.set("item", item)
-        return yaml.saveToString()
-    }
+    // --- 직렬화 (ItemStack -> Base64 String) ---
+    open fun serialize(item: ItemStack): String {
+        ByteArrayOutputStream().use { outputStream ->
+            BukkitObjectOutputStream(outputStream).use { dataOutput ->
+                dataOutput.writeObject(item)
 
-    // JSON -> ItemStack
-    private fun deserialize(data: String): ItemStack {
-        val yaml = YamlConfiguration()
-        yaml.loadFromString(data)
-        return yaml.getItemStack("item")!!
-    }
-
-    // ItemStack -> SHA-256
-    private fun hash(item: ItemStack): String {
-        val single = item.clone().apply { amount = 1 }
-        val data = serialize(single)
-        val digest = MessageDigest.getInstance("SHA-256")
-        return digest.digest(data.toByteArray()).joinToString("") {
-            "%02x".format(it)
+                return Base64.getEncoder().encodeToString(outputStream.toByteArray())
+            }
         }
+    }
+
+    // --- 역직렬화 (Base64 String -> ItemStack) ---
+    open fun deserialize(data: String): ItemStack {
+        ByteArrayInputStream(Base64.getDecoder().decode(data)).use { inputStream ->
+            BukkitObjectInputStream(inputStream).use { dataInput ->
+                return dataInput.readObject() as ItemStack
+            }
+        }
+    }
+    open fun hash(item: ItemStack): String {
+        val clone = item.clone().apply { amount = 1  }
+        val serializedData = serialize(clone)
+
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hashBytes = digest.digest(serializedData.toByteArray(Charsets.UTF_8))
+
+        return hashBytes.joinToString("") { "%02x".format(it) }
     }
 
     // 아이템 입고
@@ -45,61 +65,78 @@ class StorageService {
         val itemData = serialize(item.clone().apply { amount = 1 })
         val count = item.amount
 
+        return depositRow(gridId, itemHash, itemData, count) is DepositResult.Success
+    }
+
+    fun depositRow(gridId: String, itemHash: String, itemData: String, count: Int): DepositResult {
+        require(count > 0) { "count must be positive, was $count" }
+
         return transaction {
-            val existing = StorageItems.selectAll()
-                .where { (StorageItems.gridId eq  gridId) and
-                    (StorageItems.itemHash eq itemHash) }
-                .singleOrNull()
-
-            if(existing != null) {
-                val newAmount = existing[StorageItems.amount].toLong() + count
-                if(newAmount > Int.MAX_VALUE) return@transaction false
-
-                StorageItems.update({
-                    (StorageItems.gridId eq gridId) and
-                            (StorageItems.itemHash eq itemHash)
-                }) {
-                    it[amount] = newAmount.toInt()
+            val currentAmount = StorageItems
+                .select(StorageItems.amount)
+                .where {
+                    (StorageItems.gridId eq gridId) and (StorageItems.itemHash eq itemHash)
                 }
-            } else {
-                StorageItems.insert {
-                    it[id] = UUID.randomUUID().toString()
-                    it[StorageItems.gridId] = gridId
-                    it[StorageItems.itemHash] = itemHash
-                    it[StorageItems.itemData] = itemData
-                    it[amount] = count
-                    it[createdAt] = System.currentTimeMillis()
-                }
+                .singleOrNull()?.get(StorageItems.amount) ?: 0
+
+            if(currentAmount.toLong() + count > Int.MAX_VALUE) {
+                return@transaction DepositResult.Overflow
             }
-            true
+
+            StorageItems.upsert(
+                keys = arrayOf(StorageItems.gridId, StorageItems.itemHash),
+                onUpdate = {
+                    it[StorageItems.amount] = StorageItems.amount + count
+                }
+            ) {
+                it[id] = UUID.randomUUID().toString()
+                it[StorageItems.gridId] = gridId
+                it[StorageItems.itemHash] = itemHash
+                it[StorageItems.itemData] = itemData
+                it[amount] = count
+                it[createdAt] = System.currentTimeMillis()
+            }
+
+            DepositResult.Success
         }
     }
 
     // 아이템 출고
     fun withdraw(gridId: String, itemHash: String, count: Int): ItemStack? {
+        require(count > 0) { "count must be positive, was $count" }
+
         return transaction {
-            val row = StorageItems.selectAll()
-                .where { (StorageItems.gridId eq gridId) and
-                        (StorageItems.itemHash eq itemHash) }
+            val itemData = StorageItems
+                .select(StorageItems.itemData, StorageItems.amount)
+                .where {
+                    (StorageItems.gridId eq gridId) and (StorageItems.itemHash eq itemHash)
+                }
                 .singleOrNull() ?: return@transaction null
 
-            val stored = row[StorageItems.amount]
+            val stored = itemData[StorageItems.amount]
             val actual = count.coerceAtMost(stored)
 
-            if(stored - actual <= 0) {
-                StorageItems.deleteWhere {
-                    (StorageItems.gridId eq gridId) and
-                            (StorageItems.itemHash eq itemHash)
-                }
-            } else {
-                StorageItems.update({
-                    (StorageItems.gridId eq gridId) and
-                            (StorageItems.itemHash eq itemHash)
-                }) {
-                    it[amount] = stored - actual
+            val updated = StorageItems.update({
+                (StorageItems.gridId eq gridId) and
+                        (StorageItems.itemHash eq itemHash) and
+                        (StorageItems.amount greaterEq actual)
+            }) {
+                with(SqlExpressionBuilder) {
+                    it.update(StorageItems.amount, StorageItems.amount - actual)
                 }
             }
-        deserialize(row[StorageItems.itemData]).apply { amount = actual }
+
+            if(updated == 0) {
+                return@transaction null
+            }
+
+            StorageItems.deleteWhere {
+                (StorageItems.gridId eq gridId) and
+                        (StorageItems.itemHash eq itemHash) and
+                        (StorageItems.amount eq 0)
+            }
+
+            deserialize(itemData[StorageItems.itemData]).apply { amount = actual }
         }
     }
 
