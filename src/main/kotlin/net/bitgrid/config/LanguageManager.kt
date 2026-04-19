@@ -18,7 +18,7 @@ class LanguageManager(private val plugin: Bitgrid) {
 
     fun load() {
         instance = this
-        val lang = plugin.config.getString("language") ?: "us"
+        val lang = plugin.config.getString("language") ?: "en"
 
         val langFile = File(plugin.dataFolder, "lang/$lang.yml")
 

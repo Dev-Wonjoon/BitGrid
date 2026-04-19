@@ -19,3 +19,4 @@ permissions:
   bitgrid.admin:
     description: Storage Core admin
     default: op
+

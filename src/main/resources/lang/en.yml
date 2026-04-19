@@ -45,7 +45,7 @@ block:
 gui:
   quantity: "&7Qty: &f{amount}"
   page: "&7Page {page}"
-  search_name: "&7Search"g
+  search_name: "&7Search"
   search_lore: "&7Click to search items."
   search_prompt: "&e&l[BitGrid] &fType your search in chat. &7(Cancel: \"cancel\")"
   upgrade_name: "&bUpgrade"
