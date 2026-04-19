@@ -1,6 +1,6 @@
-package net.R1_20_1.recipe
+package net.R1_21_1.recipe
 
-import net.R1_20_1.block.StorageCoreBlock
+import net.R1_21_1.block.StorageCoreBlock
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.FileConfiguration

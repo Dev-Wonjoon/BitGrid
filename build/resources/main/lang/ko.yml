@@ -9,6 +9,10 @@ message:
     not_enough_money: "&c돈이 부족합니다. (필요: {amount})"
     no_vault: "&c경제 플러그인을 찾을 수 없습니다."
 
+  storage:
+    overflow: "&c창고 용량을 초과하여 더 이상 넣을 수 없습니다."
+    inventory_full: "&c인벤토리에 빈 공간이 부족합니다."
+
 command:
   help_give: "&e/bitgrid give <플레이어> &7- Storage Core 지급"
   help_invite: "&e/bitgrid invite <플레이어> &7- 그리드에 멤버 초대"
@@ -30,6 +34,8 @@ command:
   kick_success: "&e{player}님을 그리드에서 제외했습니다."
   member_title: "&f현재 멤버: &7{members}"
   leave_success: "&e그리드에서 탈퇴했습니다."
+  help_open: "&e/bitgrid open &7- 가상 창고 열기"
+  only_player: "&c이 명령어는 플레이어만 사용할 수 있습니다."
 
 block:
   core_name: "&bStorage Core"

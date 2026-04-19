@@ -1,4 +1,4 @@
-package net.R1_20_1.gui
+package net.R1_21_1.gui
 
 import net.bitgrid.Bitgrid
 import net.bitgrid.config.lang
@@ -18,11 +18,10 @@ class UpgradeGui(private val plugin: Bitgrid, private val gridId: String) {
     private val upgradeService = UpgradeService(plugin)
     private lateinit var inventory: Inventory
 
-    // 인자에서 gridId 제거 (이미 클래스 생성자에서 받고 있기 때문)
     fun open(player: Player) {
         inventory = org.bukkit.Bukkit.createInventory(null, SIZE, getTitle())
 
-        // 아이템 배치를 refreshGui()에 몰아넣고, 처음 열 때 한 번 호출해 주면 깔끔해져!
+        // 아이템 배치를 refreshGui()에 몰아넣고, 처음 열 때 한 번 호출해 줍니다.
         refreshGui()
 
         player.openInventory(inventory)
@@ -34,7 +33,7 @@ class UpgradeGui(private val plugin: Bitgrid, private val gridId: String) {
 
         meta.setDisplayName("§b$name")
 
-        // UpgradeService에서 최대 레벨, 비용 종류, 필요 비용 리스트를 가져와
+        // UpgradeService에서 최대 레벨, 비용 종류, 필요 비용 리스트를 가져옵니다.
         val maxLevel = upgradeService.getMaxLevel(type)
         val priceType = upgradeService.getPriceType(type)
         val costs = upgradeService.getCosts(type)

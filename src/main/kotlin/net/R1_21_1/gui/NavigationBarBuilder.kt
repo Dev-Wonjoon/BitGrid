@@ -1,4 +1,4 @@
-package net.R1_20_1.gui
+package net.R1_21_1.gui
 
 import net.bitgrid.config.lang
 import org.bukkit.entity.Player

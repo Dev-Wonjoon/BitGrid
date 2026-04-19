@@ -1,9 +1,8 @@
 package net.bitgrid
 
-import net.R1_20_1.block.StorageCoreBlock
-import net.R1_20_1.gui.StorageGui
-import net.R1_20_1.listener.StorageCoreListenerV2
-import net.R1_20_1.recipe.StorageCoreRecipe
+import net.R1_21_1.block.StorageCoreBlock
+import net.R1_21_1.gui.StorageGui
+import net.R1_21_1.recipe.StorageCoreRecipe
 import net.bitgrid.command.BitgridCommand
 import net.bitgrid.config.DatabaseConfig
 import net.bitgrid.config.LanguageManager
@@ -45,7 +44,7 @@ class Bitgrid : JavaPlugin() {
         chatInputUtil.init()
 
         server.pluginManager.registerEvents(
-            net.R1_20_1.listener.StorageCoreListenerV2(
+            net.R1_21_1.listener.StorageCoreListenerV2(
                 this,
                 storageCoreBlock,
                 storageGui,
@@ -56,12 +55,22 @@ class Bitgrid : JavaPlugin() {
         )
 
         //커맨드 등록
-        val bitgridCommand = BitgridCommand(storageCoreBlock, gridMemberService)
+        val bitgridCommand = BitgridCommand(storageCoreBlock, gridMemberService, storageGui)
         getCommand("bitgrid")?.setExecutor(bitgridCommand)
         getCommand("bitgrid")?.tabCompleter = bitgridCommand
 
 
         StorageCoreRecipe(this, storageCoreBlock).register(config)
+
+        val version = description.version
+        logger.info("BitGrid v$version has been successfully enabled.")
+        if(economy != null) {
+            logger.info("- Vault Economy Hook  : SUCCESS")
+        } else {
+            logger.info(" - Vault Economy Hook  : FAILED (Economy features limited)")
+        }
+
+        logger.info("- Loaded Language     : ${config.getString("language")?.uppercase()}")
 
         logger.info("Enabled BitGrid.")
 
@@ -69,7 +78,7 @@ class Bitgrid : JavaPlugin() {
 
     override fun onDisable() {
         databaseManager.disconnect()
-        logger.info("disabled bitgrid.")
+        logger.info("BitGrid has been successfully disabled.")
     }
 
     private fun setupEconomy(): Boolean {
