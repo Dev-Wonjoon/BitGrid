@@ -1,6 +1,7 @@
 package net.bitgrid.command
 
-import net.R1_20_1.block.StorageCoreBlock
+import net.R1_21_1.block.StorageCoreBlock
+import net.R1_21_1.gui.StorageGui
 import net.bitgrid.config.lang
 import net.bitgrid.service.GridMemberService
 import org.bukkit.Bukkit
@@ -13,16 +14,19 @@ import java.util.UUID
 
 class BitgridCommand(
     private val storageCoreBlock: StorageCoreBlock,
-    private val gridMemberService: GridMemberService
+    private val gridMemberService: GridMemberService,
+    private val storageGui: StorageGui
 ) : CommandExecutor, TabCompleter{
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isEmpty()) {
+            sender.sendMessage(lang("command.help_open"))
             sender.sendMessage(lang("command.help_give"))
             sender.sendMessage(lang("command.help_invite"))
             sender.sendMessage(lang("command.help_kick"))
             sender.sendMessage(lang("command.help_members"))
             sender.sendMessage(lang("command.help_leave"))
+
             return true
         }
 
@@ -75,6 +79,16 @@ class BitgridCommand(
                 gridMemberService.addMember(gridId, target.uniqueId)
                 sender.sendMessage(lang("command.invite_success", "player" to target.name))
                 target.sendMessage(lang("command.invite_received", "player" to sender.name))
+                return true
+            }
+            "open" -> {
+                if(sender !is Player) {
+                    sender.sendMessage(lang("message.only_player"))
+                    return true
+                }
+
+                val gridId = gridMemberService.getGridId(sender.uniqueId)
+                storageGui.open(sender, gridId, 0)
                 return true
             }
 

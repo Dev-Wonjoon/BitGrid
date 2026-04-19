@@ -4,17 +4,17 @@ import net.bitgrid.Bitgrid
 import net.bitgrid.config.lang
 import net.bitgrid.database.GridUpgrades
 import org.bukkit.entity.Player
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.jetbrains.exposed.sql.upsert
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
 
 class UpgradeService(private val plugin: Bitgrid) {
 
-    private fun getPriceType(path: String) = plugin.config.getString("storage-core.upgrades.$path.price-type") ?: "EXP"
-    private fun getCosts(path: String) = plugin.config.getDoubleList("storage-core.upgrades.$path.costs")
-    private fun getMaxLevel(path: String) = plugin.config.getInt("storage-core.upgrades.$path.max-level")
+    fun getPriceType(path: String) = plugin.config.getString("storage-core.upgrades.$path.price-type") ?: "EXP"
+    fun getCosts(path: String) = plugin.config.getDoubleList("storage-core.upgrades.$path.costs")
+    fun getMaxLevel(path: String) = plugin.config.getInt("storage-core.upgrades.$path.max-level")
     private fun getLimits(path: String) = plugin.config.getIntegerList("storage-core.upgrades.$path.limits")
 
 

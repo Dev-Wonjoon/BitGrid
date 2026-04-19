@@ -1,10 +1,10 @@
-package net.R1_20_1.gui
+package net.R1_21_1.holder
 
 import org.bukkit.Bukkit
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 
-class StorageGuiHolder(val gridId: String) : InventoryHolder {
+open class BitGridHolder(val gridId: String) : InventoryHolder {
     private lateinit var inventory: Inventory
     override fun getInventory(): Inventory = inventory
 
@@ -12,6 +12,4 @@ class StorageGuiHolder(val gridId: String) : InventoryHolder {
         inventory = Bukkit.createInventory(this, size, title)
         return inventory
     }
-
-
 }

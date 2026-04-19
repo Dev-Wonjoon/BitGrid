@@ -1,6 +1,9 @@
 message:
   no_permission: "&cYou don't have permission."
   not_ready: "&eComing soon."
+  storage:
+    overflow: "&cStorage capacity exceeded. Cannot deposit more."
+    inventory_full: "&cNot enough space in your inventory."
 
   upgrade:
     already_max: "&cAlready at maximum level."
@@ -30,6 +33,8 @@ command:
   kick_success: "&e{player} has been removed from the grid."
   member_title: "&fCurrent Members: &7{members}"
   leave_success: "&eYou have left the grid."
+  help_open: "&e/bitgrid open &7- Open virtual storage"
+  only_player: "&cThis command can only be used by players."
 
 block:
   core_name: "&bStorage Core"

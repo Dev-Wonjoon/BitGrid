@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "net"
-version = "0.1-ALPHA"
+version = "0.3-ALPHA"
 
 repositories {
     mavenCentral()
