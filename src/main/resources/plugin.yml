@@ -20,3 +20,14 @@ permissions:
     description: Storage Core admin
     default: op
 
+libraries:
+  - org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2
+  - com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0
+  - com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0
+  - org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22
+  - org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3
+  - org.jetbrains.exposed:exposed-core:0.56.0
+  - org.jetbrains.exposed:exposed-dao:0.56.0
+  - org.jetbrains.exposed:exposed-jdbc:0.56.0
+  - org.xerial:sqlite-jdbc:3.47.1.0
+  - com.zaxxer:HikariCP:6.2.1
