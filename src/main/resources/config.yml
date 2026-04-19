@@ -1,3 +1,5 @@
+language: en
+
 database:
   type: sqlite
   host: localhost

@@ -42,6 +42,11 @@ dependencies {
 
     // JSON 직렬화
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+    // 비동기 처리
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    compileOnly("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
+    compileOnly("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0")
 }
 
 tasks {
