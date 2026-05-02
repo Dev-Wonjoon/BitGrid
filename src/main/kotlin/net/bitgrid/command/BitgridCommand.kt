@@ -81,13 +81,30 @@ class BitgridCommand(
                 target.sendMessage(lang("command.invite_received", "player" to sender.name))
                 return true
             }
+
             "open" -> {
                 if(sender !is Player) {
                     sender.sendMessage(lang("message.only_player"))
                     return true
                 }
 
-                val gridId = gridMemberService.getGridId(sender.uniqueId)
+                val gridId = if(args.size >= 2) {
+                    if(!sender.hasPermission("bitgrid.admin")) {
+                        sender.sendMessage(lang("message.no_permission"))
+                        return true
+                    }
+
+                    val target = Bukkit.getPlayer(args[1])
+                    if(target == null) {
+                        sender.sendMessage(lang("command.player_not_found"))
+                        return true
+                    }
+
+                    gridMemberService.getGridId(target.uniqueId)
+                } else {
+                    gridMemberService.getGridId(sender.uniqueId)
+                }
+
                 storageGui.open(sender, gridId, 0)
                 return true
             }
@@ -153,10 +170,10 @@ class BitgridCommand(
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String?>? {
         return when (args.size) {
-            1 -> listOf("give", "invite", "kick", "members", "leave")
+            1 -> listOf("open", "give", "invite", "kick", "members", "leave")
                 .filter { it.startsWith(args[0].lowercase()) }
             2 -> when (args[0].lowercase()) {
-                "give", "invite", "kick" -> Bukkit.getOnlinePlayers()
+                "give", "invite", "kick", "open" -> Bukkit.getOnlinePlayers()
                     .map { it.name }
                     .filter { it.lowercase().startsWith(args[1].lowercase()) }
                 else -> emptyList()

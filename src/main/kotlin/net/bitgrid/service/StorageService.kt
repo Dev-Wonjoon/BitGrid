@@ -1,5 +1,7 @@
 package net.bitgrid.service
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import net.bitgrid.database.StorageItems
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.io.BukkitObjectInputStream
@@ -8,7 +10,9 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.minus
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.vendors.currentDialect
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
@@ -31,6 +35,8 @@ enum class SortType {
 }
 
 open class StorageService {
+
+    private val dbLock = Mutex()
 
     // --- 직렬화 (ItemStack -> Base64 String) ---
     open fun serialize(item: ItemStack): String {
@@ -62,7 +68,7 @@ open class StorageService {
     }
 
     // 아이템 입고
-    fun deposit(gridId: String, item: ItemStack): Boolean {
+    suspend fun deposit(gridId: String, item: ItemStack): Boolean {
         val itemHash = hash(item)
         val itemData = serialize(item.clone().apply { amount = 1 })
         val count = item.amount
@@ -70,76 +76,77 @@ open class StorageService {
         return depositRow(gridId, itemHash, itemData, count) is DepositResult.Success
     }
 
-    fun depositRow(gridId: String, itemHash: String, itemData: String, count: Int): DepositResult {
+    suspend fun depositRow(gridId: String, itemHash: String, itemData: String, count: Int): DepositResult {
         require(count > 0) { "count must be positive, was $count" }
 
-        return transaction {
-            val currentAmount = StorageItems
-                .select(StorageItems.amount)
-                .where {
-                    (StorageItems.gridId eq gridId) and (StorageItems.itemHash eq itemHash)
-                }
-                .singleOrNull()?.get(StorageItems.amount) ?: 0
+        return dbLock.withLock {
+            transaction {
+                val currentAmount = StorageItems
+                    .select(StorageItems.amount)
+                    .where {
+                        (StorageItems.gridId eq gridId) and (StorageItems.itemHash eq itemHash)
+                    }
+                    .singleOrNull()?.get(StorageItems.amount) ?: 0
 
-            if(currentAmount.toLong() + count > Int.MAX_VALUE) {
-                return@transaction DepositResult.Overflow
+                if(currentAmount.toLong() + count > Int.MAX_VALUE) {
+                    return@transaction DepositResult.Overflow
+
+                }
+
+                StorageItems.upsert(
+                    keys = arrayOf(StorageItems.gridId, StorageItems.itemHash),
+                    onUpdate = {
+                        it[StorageItems.amount] = StorageItems.amount + count
+                    }
+                ) {
+                    it[id] = UUID.randomUUID().toString()
+                    it[StorageItems.gridId] = gridId
+                    it[StorageItems.itemHash] = itemHash
+                    it[StorageItems.itemData] = itemData
+                    it[amount] = count
+                    it[createdAt] = System.currentTimeMillis()
+                }
+                DepositResult.Success
             }
 
-            StorageItems.upsert(
-                keys = arrayOf(StorageItems.gridId, StorageItems.itemHash),
-                onUpdate = {
-                    it[StorageItems.amount] = StorageItems.amount + count
-                }
-            ) {
-                it[id] = UUID.randomUUID().toString()
-                it[StorageItems.gridId] = gridId
-                it[StorageItems.itemHash] = itemHash
-                it[StorageItems.itemData] = itemData
-                it[amount] = count
-                it[createdAt] = System.currentTimeMillis()
-            }
 
-            DepositResult.Success
         }
     }
 
     // 아이템 출고
-    fun withdraw(gridId: String, itemHash: String, count: Int): ItemStack? {
+    suspend fun withdraw(gridId: String, itemHash: String, count: Int): ItemStack? {
         require(count > 0) { "count must be positive, was $count" }
 
-        return transaction {
-            val itemData = StorageItems
-                .select(StorageItems.itemData, StorageItems.amount)
-                .where {
-                    (StorageItems.gridId eq gridId) and (StorageItems.itemHash eq itemHash)
+        return dbLock.withLock {
+            transaction {
+                val row = StorageItems
+                    .select(StorageItems.itemData, StorageItems.amount)
+                    .where {
+                        (StorageItems.gridId eq gridId) and (StorageItems.itemHash eq itemHash)
+                    }
+                    .singleOrNull() ?: return@transaction null
+
+                val currentAmount = row[StorageItems.amount]
+                if(currentAmount < count) return@transaction null
+
+                if(currentAmount == count) {
+                    StorageItems.deleteWhere {
+                        (StorageItems.gridId eq gridId) and (StorageItems.itemHash eq itemHash)
+                    }
+                } else {
+                    StorageItems.update({
+                        (StorageItems.gridId eq gridId) and (StorageItems.itemHash eq itemHash)
+                    }) {
+                        it[StorageItems.amount] = currentAmount - count
+                    }
                 }
-                .singleOrNull() ?: return@transaction null
-
-            val stored = itemData[StorageItems.amount]
-            val actual = count.coerceAtMost(stored)
-
-            val updated = StorageItems.update({
-                (StorageItems.gridId eq gridId) and
-                        (StorageItems.itemHash eq itemHash) and
-                        (StorageItems.amount greaterEq actual)
-            }) {
-                with(SqlExpressionBuilder) {
-                    it.update(StorageItems.amount, StorageItems.amount - actual)
-                }
+                deserialize(row[StorageItems.itemData]).apply { amount = count }
             }
 
-            if(updated == 0) {
-                return@transaction null
-            }
 
-            StorageItems.deleteWhere {
-                (StorageItems.gridId eq gridId) and
-                        (StorageItems.itemHash eq itemHash) and
-                        (StorageItems.amount eq 0)
-            }
-
-            deserialize(itemData[StorageItems.itemData]).apply { amount = actual }
         }
+
+
     }
 
     // 플레이어의 전체 아이템 목록 조회

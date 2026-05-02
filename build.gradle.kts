@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "net"
-version = "0.3-ALPHA"
+version = "1.0-Release"
 
 repositories {
     mavenCentral()
@@ -34,9 +34,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-dao:0.56.0")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.56.0")
 
-    // 버킷 테스트
-    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.108.0")
-
     // HikariCP 커넥션 풀
     implementation("com.zaxxer:HikariCP:6.2.1")
 
@@ -47,6 +44,13 @@ dependencies {
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     compileOnly("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.22.0")
     compileOnly("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.22.0")
+
+    // 테스트
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.108.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 }
 
 tasks {
@@ -71,6 +75,10 @@ tasks.processResources {
     filesMatching("plugin.yml") {
         expand(props)
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 tasks.shadowJar {
