@@ -26,7 +26,7 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
 
 class StorageCoreListenerV2(
-    private val plugin: JavaPlugin,
+    private val plugin: Bitgrid,
     private val storageCoreBlock: StorageCoreBlock,
     private val storageGui: StorageGui,
     private val storageService: StorageService,
@@ -35,11 +35,12 @@ class StorageCoreListenerV2(
 ): Listener {
 
     private val ownerKey = NamespacedKey(plugin, "storage_core_owner")
-    private val depositHandler = DepositHandler(storageGui, storageService)
-    private val withdrawHandler = WithdrawHandler(storageGui, storageService)
+
+    private val depositHandler = DepositHandler(plugin,storageGui, storageService)
+    private val withdrawHandler = WithdrawHandler(plugin, storageGui, storageService)
     private val playerUpgradeGuis = mutableMapOf<Player, UpgradeGui>()
     private val navigationHandler = NavigationHandler(storageGui, storageService, chatInputUtil) { player, gridId ->
-        val upgradeGui = UpgradeGui(plugin as Bitgrid, gridId)
+        val upgradeGui = UpgradeGui(plugin, gridId)
         upgradeGui.open(player)
         playerUpgradeGuis[player] = upgradeGui
     }
